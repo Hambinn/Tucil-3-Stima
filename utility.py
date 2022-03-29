@@ -56,3 +56,48 @@ def countG(puzzle):
                 print(puzzle[i][j])
                 count += 1
     return count
+
+def moveUp(puzzle):
+    for i in range(4):
+        for j in range(4):
+            if(puzzle[i][j] == 16):
+                if(i-1 >= 0):
+                    puzzle[i][j] = puzzle[i-1][j]
+                    puzzle[i-1][j] = 16
+    return puzzle
+
+def moveDown(puzzle):
+    for i in range(4):
+        for j in range(4):
+            if(puzzle[i][j] == 16):
+                if(i+1 < 4):
+                    puzzle[i][j] = puzzle[i+1][j]
+                    puzzle[i+1][j] = 16
+    return puzzle
+
+def moveLeft(puzzle):
+    for i in range(4):
+        for j in range(4):
+            if(puzzle[i][j] == 16):
+                if(j-1 >= 0):
+                    puzzle[i][j] = puzzle[i][j-1]
+                    puzzle[i][j-1] = 16
+    return puzzle
+
+def moveRight(puzzle):
+    for i in range(4):
+        for j in range(4):
+            if(puzzle[i][j] == 16):
+                if(j+1 < 4):
+                    puzzle[i][j] = puzzle[i][j+1]
+                    puzzle[i][j+1] = 16
+    return puzzle
+
+def printPuzzle(puzzle):
+    for i in range(4):
+        for j in range(4):
+            if(puzzle[i][j] == 16):
+                print("  ", end="")
+            else:
+                print(puzzle[i][j],end=" ")                
+        print()
