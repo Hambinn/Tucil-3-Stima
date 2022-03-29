@@ -1,9 +1,8 @@
 import random
 
+list = random.sample(range(1, 17), 16)
 def randomList():
-    list = random.sample(range(1, 17), 16)
     print(list)
-
     puzzle = [[0 for a in range(4)] for b in range(4)]
     for i in range(4):
         for j in range(4):
@@ -15,15 +14,16 @@ def randomList():
     print(puzzle)
     return puzzle
 
-def totalKurang(puzzle,a,i,j):
+def totalKurang(list,a,i,j):
     sum = 0
-    for b in range(i,4):
-        for c in range(j,4):
-            if(a > puzzle[b][c] and puzzle[b][c] != 0):
-                print(a, " ", puzzle[b][c])
-                sum += 1
-            else:
-                sum += 0
+    for b in range((i*4+j),len(list)):
+        print("masuk")
+        print(list)
+        if(a > list[b] and list[b] != 0):
+            print(a, " ", list[b])
+            sum += 1
+        else:
+            sum += 0
     return sum
                 
 
@@ -31,7 +31,7 @@ def kurangi(puzzle):
     sum = 0
     for i in range(4):
         for j in range(4):
-            sum += totalKurang(puzzle,puzzle[i][j],i,j)
+            sum += totalKurang(list,puzzle[i][j],i,j)
     return sum
 
 print(kurangi(randomList()))
