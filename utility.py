@@ -64,7 +64,7 @@ def moveUp(puzzle):
                 if(i-1 >= 0):
                     puzzle[i][j] = puzzle[i-1][j]
                     puzzle[i-1][j] = 16
-    return puzzle
+                    return puzzle
 
 def moveDown(puzzle):
     for i in range(4):
@@ -73,7 +73,7 @@ def moveDown(puzzle):
                 if(i+1 < 4):
                     puzzle[i][j] = puzzle[i+1][j]
                     puzzle[i+1][j] = 16
-    return puzzle
+                    return puzzle
 
 def moveLeft(puzzle):
     for i in range(4):
@@ -82,7 +82,7 @@ def moveLeft(puzzle):
                 if(j-1 >= 0):
                     puzzle[i][j] = puzzle[i][j-1]
                     puzzle[i][j-1] = 16
-    return puzzle
+                    return puzzle
 
 def moveRight(puzzle):
     for i in range(4):
@@ -91,7 +91,7 @@ def moveRight(puzzle):
                 if(j+1 < 4):
                     puzzle[i][j] = puzzle[i][j+1]
                     puzzle[i][j+1] = 16
-    return puzzle
+                    return puzzle
 
 def printPuzzle(puzzle):
     for i in range(4):
@@ -101,3 +101,10 @@ def printPuzzle(puzzle):
             else:
                 print(puzzle[i][j],end=" ")                
         print()
+
+def generateBranch(puzzle,branch):
+    branch.append(puzzle)
+    branch.append(moveUp(puzzle))
+    branch.append(moveDown(puzzle))
+    branch.append(moveLeft(puzzle))
+    branch.append(moveRight(puzzle))
