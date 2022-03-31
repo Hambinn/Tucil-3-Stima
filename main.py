@@ -1,5 +1,11 @@
-from ctypes import util
+import time
 import utility
+
+
+
+
+
+#Main Algorithm
 print("Masukkan nama file: ")
 array =  utility.readfile(input())
 puzzle = utility.listToMatrix(array)
@@ -10,12 +16,8 @@ if(utility.kurangi(puzzle,array) % 2 == 0):
 else:
     print("Unsolvable\n")
 
-branch = []
 
-while(utility.countG(puzzles) != 0):
-    cost = 0
-    utility.generateBranch(puzzle,branch)
-    for i in range(len(branch)):
+
 
 
 
