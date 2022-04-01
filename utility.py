@@ -1,5 +1,7 @@
 import random
 listRandom = random.sample(range(1, 17), 16)
+ans = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
+
 
 class PriorityQueue(object):
     def __init__(self):
@@ -14,17 +16,20 @@ class PriorityQueue(object):
     def dequeue(self):
         index = 0
         for i in range(len(self.queue)):
-            if(self.queue[i][0] < self.queue[index][0]): #kolom 0 adalah cost maka akan dicari cost
+            # kolom 0 adalah cost maka akan dicari cost
+            if(self.queue[i][0] < self.queue[index][0]):
                 index = i
         item = self.queue[index]
         del self.queue[index]
         return item
 
+
 class Node:
-    def __init__(self,puzzle,prevMove,depth):
-        self.puzzle = puzzle
-        self.prevMove = prevMove
-        self.depth = depth
+    def __init__(self, data=None):
+        self.matrix = data
+        self.parent = None
+        self.depth = 0
+
 
 def readfile(fileName):
     array = []
@@ -35,10 +40,12 @@ def readfile(fileName):
             array += strings
     return array
 
+
 def parseString(strings):
     for i in range(len(strings)):
         strings[i] = int(strings[i])
     return strings
+
 
 def listToMatrix(array):
     puzzle = [[0 for a in range(4)] for b in range(4)]
@@ -48,9 +55,11 @@ def listToMatrix(array):
     return puzzle
 
 # mencari nilai kurang(i) dari satu elemen
-def totalKurang(list,a,i,j):
+
+
+def totalKurang(list, a, i, j):
     sum = 0
-    for b in range((i*4+j),len(list)):
+    for b in range((i*4+j), len(list)):
         if(a > list[b] and list[b] != 0):
             sum += 1
         else:
@@ -58,26 +67,32 @@ def totalKurang(list,a,i,j):
     return sum
 
 # mencari posisi ubin kosong pada puzzle
+
+
 def posisiKosong(puzzle):
     for i in range(4):
         for j in range(4):
             if(puzzle[i][j] == 16):
                 if((i+j) % 2 == 0):
-                    return 0,i,j
+                    return 0, i, j
                 else:
-                    return 1,i,j
+                    return 1, i, j
 
 # nilai formula kurang(i) + posisi ubin kosong
-def kurangi(puzzle,array): 
+
+
+def kurangi(puzzle, array):
     sum = 0
     for i in range(4):
         for j in range(4):
-            sum += totalKurang(array,puzzle[i][j],i,j)
-    posisikosong,_,_ = posisiKosong(puzzle)
+            sum += totalKurang(array, puzzle[i][j], i, j)
+    posisikosong, _, _ = posisiKosong(puzzle)
     return (sum + posisikosong)
 
 # mencari nilai cost dari bentuk puzzle terkini
-def cost(puzzle,depth = 0):
+
+
+def cost(puzzle, depth=0):
     count = 0
     for i in range(4):
         for j in range(4):
@@ -85,24 +100,29 @@ def cost(puzzle,depth = 0):
                 count += 1
     return (count+depth)
 
-def move(puzzle,moveTo):
-    temp = puzzle
-    _,x,y = posisiKosong(puzzle)
-    if(moveTo == "up" and x != 0):
-        x-=1
-    elif(moveTo == "down" and x != 3):
-        x+=1
-    elif(moveTo == "left" and y != 0):
-        y-=1
-    elif(moveTo == "right" and y != 3):
-        y+=1
 
-def swap(puzzle,i,j):
-    _,x,y = posisiKosong(puzzle)
+def move(puzzle, moveTo):
+    temp = puzzle
+    _, x, y = posisiKosong(puzzle)
+    if(moveTo == "up" and x != 0):
+        x -= 1
+    elif(moveTo == "down" and x != 3):
+        x += 1
+    elif(moveTo == "left" and y != 0):
+        y -= 1
+    elif(moveTo == "right" and y != 3):
+        y += 1
+    temp = swap(temp, x, y)
+    return temp
+
+
+def swap(puzzle, i, j):
+    _, x, y = posisiKosong(puzzle)
     temp = puzzle[i][j]
     puzzle[i][j] = puzzle[x][y]
     puzzle[x][y] = temp
     return puzzle
+
 
 def lawanMove(prevMove):
     if(prevMove == "up"):
@@ -114,16 +134,26 @@ def lawanMove(prevMove):
     elif(prevMove == "right"):
         return "left"
 
+
 def printPuzzle(puzzle):
     for i in range(4):
         for j in range(4):
             if(puzzle[i][j] == 16):
                 print("  ", end="")
             else:
-                print(puzzle[i][j],end=" ")                
+                print(puzzle[i][j], end=" ")
         print()
 
-def generateBranch(puzzle,branch):
+
+def solved(matrix):
+    for i in range(4):
+        for j in range(4):
+            if(matrix[i][j] != ans[i][j]):
+                return False
+    return True
+
+
+def generateBranch(puzzle, branch):
     branch.append(puzzle)
     branch.append(moveUp(puzzle))
     branch.append(moveDown(puzzle))
