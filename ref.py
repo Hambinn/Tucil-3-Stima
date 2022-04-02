@@ -188,7 +188,7 @@ final = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                  12, 13, 14, 15, 0]).reshape(4, 4)
 print("Initial Matrix =")
 path = "../test/"
-matrix = file_to_matrix("file2.txt")
+matrix = file_to_matrix("file.txt")
 r, c = check_empty_space(matrix)
 print("Empty Space at : ("+str(r)+","+str(c)+")")
 print("Cost is : "+str(cost(0, matrix, final)))

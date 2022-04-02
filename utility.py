@@ -1,11 +1,6 @@
 import random
-ans = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
-
-
-def generatePuzzle():
-    listRandom = random.sample(range(1, 17), 16)
-    puzzle = listToMatrix(listRandom)
-    return listRandom, puzzle
+import time
+target = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
 
 
 class PriorityQueue(object):
@@ -36,6 +31,12 @@ class Node:
         self.depth = 0
 
 
+def generatePuzzle():
+    listRandom = random.sample(range(1, 17), 16)
+    puzzle = listToMatrix(listRandom)
+    return listRandom, puzzle
+
+
 def readfile(fileName):
     array = []
     with open(fileName, 'r') as file:
@@ -60,8 +61,6 @@ def listToMatrix(array):
     return puzzle
 
 # mencari nilai kurang(i) dari satu elemen
-
-
 def totalKurang(list, a, i, j):
     sum = 0
     for b in range((i*4+j), len(list)):
@@ -72,8 +71,6 @@ def totalKurang(list, a, i, j):
     return sum
 
 # mencari posisi ubin kosong pada puzzle
-
-
 def posisiKosong(puzzle):
     for i in range(4):
         for j in range(4):
@@ -84,8 +81,6 @@ def posisiKosong(puzzle):
                     return 1, i, j
 
 # nilai formula kurang(i) + posisi ubin kosong
-
-
 def kurangi(puzzle, array):
     sum = 0
     for i in range(4):
@@ -95,20 +90,18 @@ def kurangi(puzzle, array):
     return (sum + posisikosong)
 
 # mencari nilai cost dari bentuk puzzle terkini
-
-
-def cost(depth, matrix, ans):
+def cost(depth, matrix):
     counter = 0
     for i in range(4):
         for j in range(4):
-            if((matrix[i][j] != ans[i][j]) and matrix[i][j] != 0):
+            if((matrix[i][j] != target[i][j]) and matrix[i][j] != 0):
                 counter += 1
     return (depth+counter)
 
 
-def move(puzzle, movement):
-    matrix_temp = copyMatrix(puzzle)
-    _, x, y = posisiKosong(matrix_temp)
+def moveTiles(puzzle, movement):
+    matrixCopy = copyMatrix(puzzle)
+    _, x, y = posisiKosong(matrixCopy)
     if(movement == "left"):
         if(y != 0):
             y -= 1
@@ -121,8 +114,8 @@ def move(puzzle, movement):
     elif(movement == "down"):
         if(x != 3):
             x += 1
-    matrix_temp = swap(matrix_temp, x, y)
-    return matrix_temp
+    matrixCopy = swap(matrixCopy, x, y)
+    return matrixCopy
 
 
 def swap(matrix, row, column):
@@ -156,12 +149,12 @@ def printPuzzle(puzzle):
 def solved(matrix):
     for i in range(4):
         for j in range(4):
-            if(matrix[i][j] != ans[i][j]):
+            if(matrix[i][j] != target[i][j]):
                 return False
     return True
 
 
-def print_matrix(matrix):
+def printPuzzle(matrix):
     print("╔═══╦═══╦═══╦═══╗")
     for i in range(4):
         for j in range(4):
@@ -175,10 +168,10 @@ def print_matrix(matrix):
     print("╚═══╩═══╩═══╩═══╝")
 
 
-def equal(matrix, ans):
+def solved(matrix, target):
     for i in range(4):
         for j in range(4):
-            if(matrix[i][j] != ans[i][j]):
+            if(matrix[i][j] != target[i][j]):
                 return False
     return True
 
@@ -191,58 +184,64 @@ def copyMatrix(matrix):
     return newMatrix
 
 
-def print_path(node):
+def printStep(node):
     if(node.parent == None):
         return
-    print_path(node.parent)
+    printStep(node.parent)
     print("\n======================")
     print("Move "+str(node.depth)+" : ")
-    print_matrix(node.matrix)
+    printPuzzle(node.matrix)
 
-def branchBound(puzzle,array):
+def printKurangi(puzzle, array):
+    for i in range(4):
+        for j in range(4):
+            print("Fungsi kurang (" ,puzzle[i][j], ") = ", totalKurang(array, puzzle[i][j], i, j))
+    print("Total Fungsi Kurangi = ", kurangi(puzzle, array))
+
+
+def branchBound(puzzle, array):
     if(kurangi(puzzle, array) % 2 == 0):
-        move = ("right", "down", "left", "up")
-        print("Solvable\n")
+        timeStart = time.time()
+        printKurangi(puzzle, array)
+        moveset = ("right", "down", "left", "up")
+        print("Solvable Puzzle\n")
         Queue = PriorityQueue()
-        generatedTree = 0
+        generatedNode = 0
 
         simpul = Node(puzzle)
-        Queue.enqueue((cost(0, simpul.matrix, ans), simpul, "", 0))
+        Queue.enqueue((cost(0, simpul.matrix), simpul, "", 0))
 
-        Queue_temp = Queue.dequeue()
-        simpul = Queue_temp[1]
-        New_Matrix = simpul.matrix
-        print_matrix(New_Matrix)
-        Move_balik = ""
-        next_step = Queue_temp[3] + 1
-        generatedTree += 1
+        tempQueue = Queue.dequeue()
+        simpul = tempQueue[1]
+        matrixMove = simpul.matrix
+        prevMove = ""
+        moveTaken = tempQueue[3] + 1
+        generatedNode += 1
 
-        while(not equal(New_Matrix, final)):
-            for mov in move:
-                print(mov)
-                if(mov != Move_balik):
-                    after_move = move(New_Matrix, mov)
-                    # utility.print_matrix(after_move)
-                    # print()
-                    # utility.print_matrix(New_Matrix)
-                    if(not equal(after_move, New_Matrix)):
-                        new_simpul = Node(after_move)
-                        new_simpul.parent = simpul
-                        new_simpul.depth = simpul.depth + 1
-                        generatedTree += 1
+        while(not solved(matrixMove, target)):
+            for mov in moveset:
+                if(mov != prevMove):
+                    after_move = moveTiles(matrixMove, mov)
+                    if(not solved(after_move, matrixMove)):
+                        newNode = Node(after_move)
+                        newNode.parent = simpul
+                        newNode.depth = simpul.depth + 1
+                        generatedNode += 1
                         Queue.enqueue(
-                            (cost(next_step, new_simpul.matrix, final), new_simpul, mov, next_step))
+                            (cost(moveTaken, newNode.matrix), newNode, mov, moveTaken))
 
-            Queue_temp = Queue.dequeue()
-            simpul = Queue_temp[1]
-            New_Matrix = simpul.matrix
-            Move = Queue_temp[2]
-            Move_balik = lawanMove(Move)
-            next_step = Queue_temp[3] + 1
-            print_matrix(New_Matrix)
-
-        utility.print_matrix(puzzle)
-        utility.print_path(simpul)
+            tempQueue = Queue.dequeue()
+            simpul = tempQueue[1]
+            matrixMove = simpul.matrix
+            movenew = tempQueue[2]
+            prevMove = lawanMove(movenew)
+            moveTaken = tempQueue[3] + 1
+        timeEnd = time.time()
+        timeEstimated = timeEnd - timeStart
+        printStep(simpul)
+        print("Waktu yang diperlukan = ", timeEstimated, "detik")
+        print("Jumlah simpul yang dihasilkan = ", generatedNode)
 
     else:
-        print("Unsolvable\n")
+        printKurangi(puzzle, array)
+        print("Unsolvable Puzzle\n")
