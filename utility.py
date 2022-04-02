@@ -1,6 +1,11 @@
 import random
-listRandom = random.sample(range(1, 17), 16)
 ans = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
+
+
+def generatePuzzle():
+    listRandom = random.sample(range(1, 17), 16)
+    puzzle = listToMatrix(listRandom)
+    return listRandom, puzzle
 
 
 class PriorityQueue(object):
@@ -92,36 +97,39 @@ def kurangi(puzzle, array):
 # mencari nilai cost dari bentuk puzzle terkini
 
 
-def cost(puzzle, depth=0):
-    count = 0
+def cost(depth, matrix, ans):
+    counter = 0
     for i in range(4):
         for j in range(4):
-            if(puzzle[i][j] != 16 and puzzle[i][j] != i*4+j+1):
-                count += 1
-    return (count+depth)
+            if((matrix[i][j] != ans[i][j]) and matrix[i][j] != 0):
+                counter += 1
+    return (depth+counter)
 
 
-def move(puzzle, moveTo):
-    temp = puzzle
-    _, x, y = posisiKosong(puzzle)
-    if(moveTo == "up" and x != 0):
-        x -= 1
-    elif(moveTo == "down" and x != 3):
-        x += 1
-    elif(moveTo == "left" and y != 0):
-        y -= 1
-    elif(moveTo == "right" and y != 3):
-        y += 1
-    temp = swap(temp, x, y)
-    return temp
+def move(puzzle, movement):
+    matrix_temp = copyMatrix(puzzle)
+    _, x, y = posisiKosong(matrix_temp)
+    if(movement == "left"):
+        if(y != 0):
+            y -= 1
+    elif(movement == "right"):
+        if(y != 3):
+            y += 1
+    elif(movement == "up"):
+        if(x != 0):
+            x -= 1
+    elif(movement == "down"):
+        if(x != 3):
+            x += 1
+    matrix_temp = swap(matrix_temp, x, y)
+    return matrix_temp
 
 
-def swap(puzzle, i, j):
-    _, x, y = posisiKosong(puzzle)
-    temp = puzzle[i][j]
-    puzzle[i][j] = puzzle[x][y]
-    puzzle[x][y] = temp
-    return puzzle
+def swap(matrix, row, column):
+    _, x, y = posisiKosong(matrix)
+    matrix[x][y] = matrix[row][column]
+    matrix[row][column] = 16
+    return matrix
 
 
 def lawanMove(prevMove):
@@ -153,9 +161,40 @@ def solved(matrix):
     return True
 
 
-def generateBranch(puzzle, branch):
-    branch.append(puzzle)
-    branch.append(moveUp(puzzle))
-    branch.append(moveDown(puzzle))
-    branch.append(moveLeft(puzzle))
-    branch.append(moveRight(puzzle))
+def print_matrix(matrix):
+    print("╔═══╦═══╦═══╦═══╗")
+    for i in range(4):
+        for j in range(4):
+            print("║ ", end="")
+            print(matrix[i][j], end="")
+            if(matrix[i][j] < 10):
+                print(" ", end="")
+        print("║")
+        if(i != 3):
+            print("╠═══╬═══╬═══╬═══╣")
+    print("╚═══╩═══╩═══╩═══╝")
+
+
+def equal(matrix, ans):
+    for i in range(4):
+        for j in range(4):
+            if(matrix[i][j] != ans[i][j]):
+                return False
+    return True
+
+
+def copyMatrix(matrix):
+    newMatrix = [[0 for a in range(4)] for b in range(4)]
+    for i in range(4):
+        for j in range(4):
+            newMatrix[i][j] = matrix[i][j]
+    return newMatrix
+
+
+def print_path(node):
+    if(node.parent == None):
+        return
+    print_path(node.parent)
+    print("\n======================")
+    print("Move "+str(node.depth)+" : ")
+    print_matrix(node.matrix)
