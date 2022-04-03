@@ -1,6 +1,7 @@
 import random
 import time
 target = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
+moveset = ("right", "down", "left", "up")
 
 
 class PriorityQueue(object):
@@ -16,7 +17,6 @@ class PriorityQueue(object):
     def dequeue(self):
         index = 0
         for i in range(len(self.queue)):
-            # kolom 0 adalah cost maka akan dicari cost
             if(self.queue[i][0] < self.queue[index][0]):
                 index = i
         item = self.queue[index]
@@ -91,28 +91,24 @@ def kurangi(puzzle, array):
 
 # mencari nilai cost dari bentuk puzzle terkini
 def cost(depth, matrix):
-    counter = 0
+    sum = 0
     for i in range(4):
         for j in range(4):
-            if((matrix[i][j] != target[i][j]) and matrix[i][j] != 0):
-                counter += 1
-    return (depth+counter)
+            if((matrix[i][j] != target[i][j]) and matrix[i][j] !=16):
+                sum += 1
+    return (depth+sum)
 
 
 def moveTiles(puzzle, movement):
     matrixCopy = copyMatrix(puzzle)
     _, x, y = posisiKosong(matrixCopy)
-    if(movement == "left"):
-        if(y != 0):
+    if(movement == "left" and y != 0):
             y -= 1
-    elif(movement == "right"):
-        if(y != 3):
+    elif(movement == "right" and y != 3):
             y += 1
-    elif(movement == "up"):
-        if(x != 0):
+    elif(movement == "up" and x != 0):
             x -= 1
-    elif(movement == "down"):
-        if(x != 3):
+    elif(movement == "down" and x != 3):
             x += 1
     matrixCopy = swap(matrixCopy, x, y)
     return matrixCopy
@@ -135,17 +131,6 @@ def lawanMove(prevMove):
     elif(prevMove == "right"):
         return "left"
 
-
-def printPuzzle(puzzle):
-    for i in range(4):
-        for j in range(4):
-            if(puzzle[i][j] == 16):
-                print("  ", end="")
-            else:
-                print(puzzle[i][j], end=" ")
-        print()
-
-
 def solved(matrix):
     for i in range(4):
         for j in range(4):
@@ -159,7 +144,10 @@ def printPuzzle(matrix):
     for i in range(4):
         for j in range(4):
             print("║ ", end="")
-            print(matrix[i][j], end="")
+            if(matrix[i][j] == 16):
+                print("  ", end="")
+            else:
+                print(matrix[i][j], end="")
             if(matrix[i][j] < 10):
                 print(" ", end="")
         print("║")
@@ -188,22 +176,21 @@ def printStep(node):
     if(node.parent == None):
         return
     printStep(node.parent)
-    print("\n======================")
-    print("Move "+str(node.depth)+" : ")
+    print("\n")
+    print("Langkah "+str(node.depth)+" : ")
     printPuzzle(node.matrix)
 
 def printKurangi(puzzle, array):
     for i in range(4):
         for j in range(4):
             print("Fungsi kurang (" ,puzzle[i][j], ") = ", totalKurang(array, puzzle[i][j], i, j))
-    print("Total Fungsi Kurangi = ", kurangi(puzzle, array))
+    print("Total Fungsi Kurangi  + posisi ubin = ", kurangi(puzzle, array))
 
 
 def branchBound(puzzle, array):
     if(kurangi(puzzle, array) % 2 == 0):
         timeStart = time.time()
         printKurangi(puzzle, array)
-        moveset = ("right", "down", "left", "up")
         print("Solvable Puzzle\n")
         Queue = PriorityQueue()
         generatedNode = 0
@@ -215,7 +202,7 @@ def branchBound(puzzle, array):
         simpul = tempQueue[1]
         matrixMove = simpul.matrix
         prevMove = ""
-        moveTaken = tempQueue[3] + 1
+        depth = tempQueue[3] + 1
         generatedNode += 1
 
         while(not solved(matrixMove, target)):
@@ -228,14 +215,14 @@ def branchBound(puzzle, array):
                         newNode.depth = simpul.depth + 1
                         generatedNode += 1
                         Queue.enqueue(
-                            (cost(moveTaken, newNode.matrix), newNode, mov, moveTaken))
+                            (cost(depth, newNode.matrix), newNode, mov, depth))
 
             tempQueue = Queue.dequeue()
             simpul = tempQueue[1]
             matrixMove = simpul.matrix
-            movenew = tempQueue[2]
-            prevMove = lawanMove(movenew)
-            moveTaken = tempQueue[3] + 1
+            moveNew = tempQueue[2]
+            prevMove = lawanMove(moveNew)
+            depth = tempQueue[3] + 1
         timeEnd = time.time()
         timeEstimated = timeEnd - timeStart
         printStep(simpul)

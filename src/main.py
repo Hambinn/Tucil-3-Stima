@@ -14,5 +14,5 @@ if pilihan == 1:
     utility.branchBound(puzzle, array)
 else:
     array, puzzle = utility.generatePuzzle()
-    utility.print_matrix(puzzle)
+    utility.printPuzzle(puzzle)
     utility.branchBound(puzzle, array)
